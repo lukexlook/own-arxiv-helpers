@@ -1,2 +1,1 @@
-def hello() -> str:
-    return "Hello from own-arxiv-helpers!"
+from .fetch import get_arxiv_paper

@@ -1,61 +1,29 @@
 import re
-from functools import cached_property
-from typing import Optional
+from typing import Any
 
 import arxiv
-import requests
-from requests.adapters import HTTPAdapter, Retry
 
 
-class ArxivPaper:
-    def __init__(self, paper: arxiv.Result):
-        self._paper = paper
-        self.score = None
+class ArxivPaper(object):
 
-    @property
-    def title(self) -> str:
-        return self._paper.title
+    def __init__(self, paper: arxiv.Result) -> None:
+        self.title = paper.title
+        self.authors = [au.name for au in paper.authors]
+        self.summary = paper.summary
 
-    @property
-    def summary(self) -> str:
-        return self._paper.summary
+        self.arxiv_id = re.sub(r"v\d+$", "", paper.get_short_id())
+        self.pdf_url = paper.pdf_url
 
-    @property
-    def authors(self) -> list[str]:
-        return self._paper.authors
+        self.comment = paper.comment
+        self.categories = paper.categories
 
-    @cached_property
-    def arxiv_id(self) -> str:
-        return re.sub(r"v\d+$", "", self._paper.get_short_id())
-
-    @property
-    def pdf_url(self) -> str:
-        return self._paper.pdf_url
-
-    @cached_property
-    def code_url(self) -> Optional[str]:
-        s = requests.Session()
-        retries = Retry(total=5, backoff_factor=0.1)
-        s.mount("https://", HTTPAdapter(max_retries=retries))
-        try:
-            paper_list = s.get(
-                f"https://paperswithcode.com/api/v1/papers/?arxiv_id={self.arxiv_id}"
-            ).json()
-        except Exception as e:
-            logger.debug(f"Error when searching {self.arxiv_id}: {e}")
-            return None
-
-        if paper_list.get("count", 0) == 0:
-            return None
-        paper_id = paper_list["results"][0]["id"]
-
-        try:
-            repo_list = s.get(
-                f"https://paperswithcode.com/api/v1/papers/{paper_id}/repositories/"
-            ).json()
-        except Exception as e:
-            logger.debug(f"Error when searching {self.arxiv_id}: {e}")
-            return None
-        if repo_list.get("count", 0) == 0:
-            return None
-        return repo_list["results"][0]["url"]
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "title": self.title,
+            "authors": self.authors,
+            "summary": self.summary,
+            "arxiv_id": self.arxiv_id,
+            "pdf_url": self.pdf_url,
+            "comment": self.comment,
+            "categories": self.categories,
+        }
