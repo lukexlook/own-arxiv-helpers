@@ -2,12 +2,10 @@ import json
 import sys
 
 import arxiv
+from ruamel.yaml import YAML
 from tqdm import tqdm
 
 sys.path.append("src")
-
-from ruamel.yaml import YAML
-
 from own_arxiv_helpers.paper import ArxivPaper
 
 yaml = YAML(typ="safe")
