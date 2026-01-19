@@ -14,8 +14,8 @@ with open("categories.yml") as fp:
 
 
 if __name__ == "__main__":
-    a = "2511.05491"
-    b = "2511.07421"
+    a = "2601.03256"
+    b = "2601.04195"
 
     year_month = a.split(".")[0]
     assert year_month == b.split(".")[0]
